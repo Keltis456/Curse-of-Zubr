@@ -9,12 +9,16 @@ public class MainScript : MonoBehaviour {
     public GameObject authMenu;
     public GameObject adminMenu;
     public GameObject userMenu;
+    public GameObject errorMenu;
 
     public InputField[] fields;
 
-    User[] users;
+    User currUser;
 
 	void Start () {
+        Database.users.Add(new User("0","0pass", true, false));
+        Database.users.Add(new User("1", "1pass", false, false));
+        Database.users.Add(new User("2", "2pass", false, true));
         ShowMainMenu();
 	}
 
@@ -30,6 +34,9 @@ public class MainScript : MonoBehaviour {
         HideAllMenus();
         adminMenu.SetActive(true);
         fields = adminMenu.GetComponentsInChildren<InputField>();
+        if (currUser != null)
+            adminMenu.transform.GetComponentInChildren<Text>().text = 
+                "Welcome to Admin Menu, " + currUser.login;
     }
 
     public void ShowUserMenu()
@@ -37,6 +44,9 @@ public class MainScript : MonoBehaviour {
         HideAllMenus();
         userMenu.SetActive(true);
         fields = userMenu.GetComponentsInChildren<InputField>();
+        if (currUser != null)
+            userMenu.transform.GetComponentInChildren<Text>().text = 
+                "Welcome to User Menu, " + currUser.login + "\n\nMoney : " + currUser.money + " " + currUser.currency;
     }
 
     public void ShowAuthMenu()
@@ -46,19 +56,87 @@ public class MainScript : MonoBehaviour {
         fields = authMenu.GetComponentsInChildren<InputField>();
     }
 
+    public void AddMoney()
+    {
+        if(currUser != null)
+        {
+            try
+            {
+                if (fields[0].text == "" || fields[0].text == null) return;
+                currUser.money += float.Parse(fields[0].text);
+
+            }
+            catch (System.Exception exeption)
+            {
+                SendError(exeption.Message);
+                throw;
+            }
+            
+        }
+        ShowUserMenu();
+    }
+
+    public void WithdrawMoney()
+    {
+        if (currUser != null)
+        {
+            try
+            {
+                if (fields[0].text == "" || fields[0].text == null) return;
+                if (currUser.money - float.Parse(fields[0].text) >= 0)
+                {
+                    currUser.money -= float.Parse(fields[0].text);
+                }
+                else
+                {
+                    SendError("Insufficient funds");
+                    return;
+                }
+            }
+            catch (System.Exception exeption)
+            {
+                SendError(exeption.Message);
+                throw;
+            }
+        }
+        ShowUserMenu();
+    }
+
     public void HideAllMenus()
     {
         mainMenu.SetActive(false);
         authMenu.SetActive(false);
         adminMenu.SetActive(false);
         userMenu.SetActive(false);
+        errorMenu.SetActive(false);
+    }
+
+    public void SendError(string _error)
+    {
+        HideAllMenus();
+        errorMenu.SetActive(true);
+        if (_error != null) errorMenu.transform.GetComponentInChildren<Text>().text = _error;
     }
 
     public void Auth()
     {
         HideAllMenus();
-        Debug.Log("Auth!");
-        ShowMainMenu();
+        User _user = Database.FindByLogin(fields[0].text);
+        if (_user != null)
+        {
+            if (_user.pass == fields[1].text)
+            {
+                currUser = _user;
+                Debug.Log("Auth!");
+                if (!_user.isBlocked)
+                    if (_user.admin) ShowAdminMenu();
+                    else ShowUserMenu();
+                else SendError("User blocked!");
+                return;
+            }
+            else SendError("Wrong password!");
+        }
+        else SendError("User does not exist!");
     }
 
     public void ExitApp()
@@ -68,106 +146,6 @@ public class MainScript : MonoBehaviour {
     }
 
     
-/*
-    static void PublicMenu()
-    {
-        //Console.Clear();
-        Console.WriteLine();
-        Console.WriteLine("Если вы хотите войти, как админ нажмите 1 ");
-
-        Console.WriteLine("Ксли вы хотите войти, как пользователь нажмите 2");
-
-        Console.WriteLine("Если вы хотите выйти из программы нажмите 0");
-        string a = Console.ReadLine();
-
-        if (a == "1")
-        {
-            Console.Clear();
-
-            Console.WriteLine("Введите логин админа");
-            string loginadmin = Console.ReadLine();
-
-            Console.WriteLine("Введите пароль админа");
-            string passwordadmin = Console.ReadLine();
-
-            if (loginadmin + " " + passwordadmin == AdminLoginandPassword)
-            {
-                AdminMenu();
-            }
-            else
-            {
-                Console.WriteLine("Неправильный ввод!!!");
-                PublicMenu();
-            }
-
-        }
-        else
-        {
-            if (a == "2")
-            {
-                Console.Clear();
-                Console.WriteLine("Введите логин");
-                string loginuser = Console.ReadLine();
-
-                Console.WriteLine("Введите пароль");
-                string passworduser = Console.ReadLine();
-
-                bool flag = false;
-                int IdUser = 0;
-
-                for (int i = 0; i < UserLoginandPassword.Length; i++)
-                {
-                    if (loginuser + " " + passworduser == UserLoginandPassword[i])
-                    {
-                        flag = true;
-
-                        IdUser = i;
-
-                        break;
-                    }
-                }
-
-                if (flag)
-                {
-                    if (statuc[IdUser] == "Активный")
-                    {
-
-                        UserMenu(IdUser);
-
-                    }
-                    else
-                    {
-                        Console.WriteLine("Ваш аккаунт заблокирован!!!");
-                        PublicMenu();
-                    }
-                }
-                else
-                {
-                    //Console.Clear();
-                    Console.WriteLine("Неправильный ввод!!!");
-                    PublicMenu();
-
-                }
-
-
-            }
-
-            else
-            {
-                if (a == "0")
-                {
-
-                }
-                else
-                {
-                    Console.Clear();
-                    Console.WriteLine("Неправильный ввод  !!!");
-                    PublicMenu();
-                }
-            }
-        }
-    }
-*/
 
         /*
     static void AdminMenu()
@@ -439,152 +417,5 @@ public class MainScript : MonoBehaviour {
         }
 
     }
-
-    static void UserMenu(int IdUser)
-    {
-        Console.Clear();
-        Console.WriteLine("Здравствуйте " + UserName[IdUser]);
-        Console.WriteLine("Если вы хотите посмотреть баланс нажмите 1");
-        Console.WriteLine("Если вы хотите пополнить счёт нажмите 2");
-        Console.WriteLine("Если вы хотите снять деньги нажмите 3");
-        Console.WriteLine("Если вы хотите выйти из аккаунта нажмите 0");
-
-        string a = Console.ReadLine();
-        if (a == "1")
-        {
-            Console.Clear();
-            Console.WriteLine("На вашем счету " + accounts[IdUser] + " долларов");
-
-            Console.WriteLine("Для продолжения нажмите любую кпонку...... ");
-            string q = Console.ReadLine();
-
-            switch ("q")
-            {
-                case "zxcvbnmm":
-                    {
-                        break;
-                    }
-                default:
-                    {
-                        UserMenu(IdUser);
-                        break;
-                    }
-            }
-
-            UserMenu(IdUser);
-        }
-        else
-        {
-            if (a == "2")
-            {
-                Console.Clear();
-                Console.WriteLine("Введите сумму денег, которую хотите положить на счёт ");
-                int sum = int.Parse(Console.ReadLine());
-                accounts[IdUser] += sum;
-                Console.WriteLine("Теперь на вашем счету " + accounts[IdUser] + " долларов");
-
-                Console.WriteLine("Для продолжения нажмите любую кпонку...... ");
-                string q = Console.ReadLine();
-
-                switch ("q")
-                {
-                    case "zxcvbnmm":
-                        {
-                            break;
-                        }
-                    default:
-                        {
-                            UserMenu(IdUser);
-                            break;
-                        }
-                }
-
-                UserMenu(IdUser);
-
-            }
-
-            else
-            {
-
-                if (a == "3")
-                {
-                    Console.Clear();
-                    bool flag = true;
-                    int sum = 0;
-
-                    while (flag)
-                    {
-                        Console.WriteLine("На вашем счету " + accounts[IdUser] + " долларов");
-                        Console.Write("Введите сумму денег, которую хотите снять ");
-                        sum = int.Parse(Console.ReadLine());
-
-                        if (sum > accounts[IdUser])
-                        {
-                            Console.WriteLine();
-                            Console.WriteLine("Это сумма превышает ваш баланс!!!");
-
-                            Console.WriteLine("Повторная попытка");
-                        }
-                        else
-                        {
-                            flag = false;
-                        }
-                    }
-                    accounts[IdUser] -= sum;
-                    Console.WriteLine("Деньги выданы. Теперь на ваше счету " + accounts[IdUser] + " долларов");
-
-                    Console.WriteLine("Для продолжения нажмите любую кпонку...... ");
-                    string q = Console.ReadLine();
-
-                    switch ("q")
-                    {
-                        case "zxcvbnmm":
-                            {
-                                break;
-                            }
-                        default:
-                            {
-                                UserMenu(IdUser);
-                                break;
-                            }
-                    }
-
-                    UserMenu(IdUser);
-                }
-
-                else
-                {
-                    if (a == "0")
-                    {
-                        Console.Clear();
-                        PublicMenu();
-                    }
-                    else
-                    {
-                        //Console.Clear();
-                        Console.WriteLine("Неправильный ввод");
-                        Console.WriteLine();
-
-                        Console.WriteLine("Для продолжения нажмите любую кпонку...... ");
-                        string q = Console.ReadLine();
-
-                        switch ("q")
-                        {
-                            case "zxcvbnmm":
-                                {
-                                    break;
-                                }
-                            default:
-                                {
-                                    UserMenu(IdUser);
-                                    break;
-                                }
-                        }
-
-                        UserMenu(IdUser);
-                    }
-                }
-            }
-        }
         */
 }
