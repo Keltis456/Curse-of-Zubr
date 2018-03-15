@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -35,6 +34,9 @@ public class UserListManager : MonoBehaviour {
                 " " + Database.users[i].currency + 
                 "\nisAdmin: " + Database.users[i].admin +
                 "\nisBlocked: " + Database.users[i].isBlocked;
+            string _login = Database.users[i].login;
+            obj.GetComponentsInChildren<Button>()[0].onClick.AddListener(delegate { MainScript.instance.BlockUser(_login); } );
+            obj.GetComponentsInChildren<Button>()[1].onClick.AddListener(delegate { MainScript.instance.DeleteUser(_login); });
             entrys.Add(obj);
             Debug.Log(obj);
         }
