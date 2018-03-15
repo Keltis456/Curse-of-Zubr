@@ -16,9 +16,11 @@ public class MainScript : MonoBehaviour {
     User currUser;
 
 	void Start () {
-        Database.users.Add(new User("0","0pass", true, false));
-        Database.users.Add(new User("1", "1pass", false, false));
-        Database.users.Add(new User("2", "2pass", false, true));
+        Database.users.Add(new User("0","0", true, false));
+        Database.users.Add(new User("1", "1", false, false, 40, "UAH"));
+        Database.users.Add(new User("2", "2", false, true));
+        Database.users.Add(new User("3", "3", false, false, 1000f, "EUR"));
+        Database.users.Add(new User("4", "4", true, false, 9000f, "EUR"));
         ShowMainMenu();
 	}
 
@@ -37,6 +39,7 @@ public class MainScript : MonoBehaviour {
         if (currUser != null)
             adminMenu.transform.GetComponentInChildren<Text>().text = 
                 "Welcome to Admin Menu, " + currUser.login;
+        UserListManager.instance.ListUpdate();
     }
 
     public void ShowUserMenu()
