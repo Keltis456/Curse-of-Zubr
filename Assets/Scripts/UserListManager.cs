@@ -15,7 +15,8 @@ public class UserListManager : MonoBehaviour {
     }
 
     // Use this for initialization
-    void Start () {
+    void Start ()
+    {
         ListUpdate();
     }
 
@@ -32,7 +33,6 @@ public class UserListManager : MonoBehaviour {
             obj.GetComponentInChildren<Text>().text = "User: " + Database.users[i].login + 
                 "\nMoney: " + Database.users[i].money + 
                 " " + Database.users[i].currency + 
-                "\nisAdmin: " + Database.users[i].admin +
                 "\nisBlocked: " + Database.users[i].isBlocked;
             string _login = Database.users[i].login;
             obj.GetComponentsInChildren<Button>()[0].onClick.AddListener(delegate { MainScript.instance.BlockUser(_login); } );

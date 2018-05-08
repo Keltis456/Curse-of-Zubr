@@ -5,13 +5,18 @@ public class MainScript : MonoBehaviour {
 
     public GameObject mainMenu;
     public GameObject authMenu;
+    public GameObject singUpMenu;
     public GameObject adminMenu;
     public GameObject userMenu;
     public GameObject errorMenu;
 
     public InputField[] fields;
 
+    public bool isAuthForAdmin = false;
+
     User currUser;
+
+    User admin;
 
     public static MainScript instance;
 
@@ -21,11 +26,12 @@ public class MainScript : MonoBehaviour {
     }
 
     void Start () {
-        Database.users.Add(new User("0","0", true, false));
-        Database.users.Add(new User("1", "1", false, false, 40, "UAH"));
-        Database.users.Add(new User("2", "2", false, true));
-        Database.users.Add(new User("3", "3", false, false, 1000f, "EUR"));
-        Database.users.Add(new User("4", "4", true, false, 9000f, "EUR"));
+        admin = new User("admin", "admin");
+        Database.users.Add(new User("0","0", true));
+        Database.users.Add(new User("1", "1", false, 40, "UAH"));
+        Database.users.Add(new User("2", "2", false));
+        Database.users.Add(new User("3", "3", false, 1000f, "EUR"));
+        Database.users.Add(new User("4", "4", true, 9000f, "EUR"));
         ShowMainMenu();
 	}
 
@@ -54,7 +60,10 @@ public class MainScript : MonoBehaviour {
         fields = userMenu.GetComponentsInChildren<InputField>();
         if (currUser != null)
             userMenu.transform.GetComponentInChildren<Text>().text = 
-                "Welcome to User Menu, " + currUser.login + "\n\nMoney : " + currUser.money + " " + currUser.currency;
+                "Welcome to User Menu, " + currUser.login 
+                + "\n\nВаш логин : " + currUser.login 
+                + "\n\nВаш пароль : " + currUser.pass
+                + "\n\nБаланс : " + currUser.money + " " + currUser.currency;
     }
 
     public void ShowAuthMenu()
@@ -62,6 +71,15 @@ public class MainScript : MonoBehaviour {
         HideAllMenus();
         authMenu.SetActive(true);
         fields = authMenu.GetComponentsInChildren<InputField>();
+        isAuthForAdmin = false;
+    }
+
+    public void ShowAuthAdminMenu()
+    {
+        HideAllMenus();
+        authMenu.SetActive(true);
+        fields = authMenu.GetComponentsInChildren<InputField>();
+        isAuthForAdmin = true;
     }
 
     public void AddMoney()
@@ -129,22 +147,39 @@ public class MainScript : MonoBehaviour {
     public void Auth()
     {
         HideAllMenus();
-        User _user = Database.FindByLogin(fields[0].text);
-        if (_user != null)
+        if (isAuthForAdmin)
         {
-            if (_user.pass == fields[1].text)
+            if (admin.login == fields[0].text)
             {
-                currUser = _user;
-                Debug.Log("Auth!");
-                if (!_user.isBlocked)
-                    if (_user.admin) ShowAdminMenu();
-                    else ShowUserMenu();
-                else SendError("User blocked!");
-                return;
+                if (admin.pass == fields[1].text)
+                {
+                    currUser = admin;
+                    ShowAdminMenu();
+                    return;
+                }
+                else SendError("Wrong password!");
             }
-            else SendError("Wrong password!");
+            else SendError("User does not exist!");
         }
-        else SendError("User does not exist!");
+        else
+        {
+            User _user = Database.FindByLogin(fields[0].text);
+            if (_user != null)
+            {
+                if (_user.pass == fields[1].text)
+                {
+                    currUser = _user;
+                    Debug.Log("Auth!");
+                    if (!_user.isBlocked)
+                        if (isAuthForAdmin) ShowAdminMenu();
+                        else ShowUserMenu();
+                    else SendError("User blocked!");
+                    return;
+                }
+                else SendError("Wrong password!");
+            }
+            else SendError("User does not exist!");
+        }
     }
 
     public void ExitApp()
@@ -157,7 +192,7 @@ public class MainScript : MonoBehaviour {
     {
         if (fields[0].text == null || fields[0].text == "") return;
         if (fields[1].text == null || fields[1].text == "") return;
-        Database.users.Add(new User(fields[0].text, fields[1].text, adminMenu.GetComponentInChildren<Toggle>().isOn));
+        Database.users.Add(new User(fields[0].text, fields[1].text));
         ShowAdminMenu();
     }
 
