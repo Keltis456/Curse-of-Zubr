@@ -30,13 +30,15 @@ public class UserListManager : MonoBehaviour {
         for (int i = 0; i < Database.users.Count; i++)
         {
             GameObject obj = Instantiate(userEntryEthalon, transform);
-            obj.GetComponentInChildren<Text>().text = "User: " + Database.users[i].login + 
-                "\nMoney: " + Database.users[i].money + 
+            obj.GetComponentInChildren<Text>().text = "ПІБ : " + Database.users[i].surname + " " + Database.users[i].name + " " + Database.users[i].patronymic +
+                "\nЛогін : " + Database.users[i].login + 
+                "\nБаланс : " + Database.users[i].money + 
                 " " + Database.users[i].currency + 
-                "\nisBlocked: " + Database.users[i].isBlocked;
+                "\nСтатус : " + Database.users[i].isBlocked;
             string _login = Database.users[i].login;
             obj.GetComponentsInChildren<Button>()[0].onClick.AddListener(delegate { MainScript.instance.BlockUser(_login); } );
             obj.GetComponentsInChildren<Button>()[1].onClick.AddListener(delegate { MainScript.instance.DeleteUser(_login); });
+            obj.GetComponentsInChildren<Button>()[2].onClick.AddListener(delegate { MainScript.instance.ShowLogMenu(_login); });
             entrys.Add(obj);
             Debug.Log(obj);
         }
