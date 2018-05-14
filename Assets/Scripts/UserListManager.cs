@@ -34,7 +34,7 @@ public class UserListManager : MonoBehaviour {
                 "\nЛогін : " + Database.users[i].login + 
                 "\nБаланс : " + Database.users[i].money + 
                 " " + Database.users[i].currency + 
-                "\nСтатус : " + Database.users[i].isBlocked;
+                "\nСтатус : " + (!Database.users[i].isBlocked ? "активний(а)" : "заблокований(а)");
             string _login = Database.users[i].login;
             obj.GetComponentsInChildren<Button>()[0].onClick.AddListener(delegate { MainScript.instance.BlockUser(_login); } );
             obj.GetComponentsInChildren<Button>()[1].onClick.AddListener(delegate { MainScript.instance.DeleteUser(_login); });

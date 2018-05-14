@@ -81,6 +81,7 @@ public class MainScript : MonoBehaviour {
         fields = mainMenu.GetComponentsInChildren<InputField>();
         lastMenu = currentMenu;
         currentMenu = Menu.mainMenu;
+        ClearFields();
     }
 
     public void ShowAdminMenu()
@@ -94,6 +95,7 @@ public class MainScript : MonoBehaviour {
         UserListManager.instance.ListUpdate();
         lastMenu = currentMenu;
         currentMenu = Menu.adminMenu;
+        ClearFields();
     }
 
     public void ShowUserMenu()
@@ -109,6 +111,7 @@ public class MainScript : MonoBehaviour {
                 + "\nБаланс : " + currUser.money + " " + currUser.currency;
         lastMenu = currentMenu;
         currentMenu = Menu.userMenu;
+        ClearFields();
     }
 
     public void ShowAuthMenu()
@@ -119,6 +122,7 @@ public class MainScript : MonoBehaviour {
         isAuthForAdmin = false;
         lastMenu = currentMenu;
         currentMenu = Menu.authMenu;
+        ClearFields();
     }
 
     public void ShowSingUpMenu()
@@ -128,6 +132,7 @@ public class MainScript : MonoBehaviour {
         fields = singUpMenu.GetComponentsInChildren<InputField>();
         lastMenu = currentMenu;
         currentMenu = Menu.singUpMenu;
+        ClearFields();
     }
 
     public void ShowAuthAdminMenu()
@@ -138,6 +143,7 @@ public class MainScript : MonoBehaviour {
         isAuthForAdmin = true;
         lastMenu = currentMenu;
         currentMenu = Menu.authAdminMenu;
+        ClearFields();
     }
     
     public void ShowTransactionMenu()
@@ -149,8 +155,12 @@ public class MainScript : MonoBehaviour {
         dropdown.options.Clear();
         foreach (User item in Database.users)
         {
-            dropdown.options.Add(new Dropdown.OptionData(item.surname + " " + item.name + " " + item.patronymic));
+            if (item != currUser)
+            {
+                dropdown.options.Add(new Dropdown.OptionData(item.surname + " " + item.name + " " + item.patronymic));
+            }
         }
+        ClearFields();
     }
 
     public void HideTransactionMenu()
@@ -166,7 +176,7 @@ public class MainScript : MonoBehaviour {
         dialogMenu.GetComponentsInChildren<Text>()[0].text = "На вашому рахунку : " + currUser.money.ToString() + " " + currUser.currency;
         if (isAddMoney) dialogMenu.GetComponentsInChildren<Text>()[1].text = "Покласти гроші";
         else dialogMenu.GetComponentsInChildren<Text>()[1].text = "Зняти гроші";
-
+        ClearFields();
     }
 
     public void HideDialogMenu()
@@ -178,6 +188,7 @@ public class MainScript : MonoBehaviour {
     {
         logMenu.SetActive(true);
         if (_user != null) logMenu.transform.GetComponentInChildren<Text>().text = OperationsLog.GetUserLog(_user);
+        ClearFields();
     }
 
     public void HideLogMenu()
@@ -196,6 +207,7 @@ public class MainScript : MonoBehaviour {
         transactionMenu.SetActive(false);
         dialogMenu.SetActive(false);
         logMenu.SetActive(false);
+        ClearFields();
     }
     #endregion
 
@@ -289,14 +301,14 @@ public class MainScript : MonoBehaviour {
             SendError("Недостатньо коштів на рахунку");
             return;
         }
-        if (currUser == Database.users[dropdown.value])
+        if (currUser == Database.FindBySNP(dropdown.options[dropdown.value].text))
         {
             SendError("Ви не можете перевести гроші самому собі");
             return;
         }
         currUser.money -= float.Parse(fields[0].text);
-        Database.users[dropdown.value].money += float.Parse(fields[0].text);
-        OperationsLog.AddToLog(currUser.login, float.Parse(fields[0].text), Database.users[dropdown.value].login);
+        Database.FindBySNP(dropdown.options[dropdown.value].text).money += float.Parse(fields[0].text);
+        OperationsLog.AddToLog(currUser.login, float.Parse(fields[0].text), Database.FindBySNP(dropdown.options[dropdown.value].text).login);
         HideTransactionMenu();
         if (currUser != null)
             userMenu.transform.GetComponentInChildren<Text>().text =
@@ -384,12 +396,16 @@ public class MainScript : MonoBehaviour {
     #endregion
 
     #region SystemOptions
+    public void ClearFields()
+    {
+        if (fields != null)
+            foreach (InputField item in fields)
+                item.text = "";
+    }
+
     public void BackToLastMenu()
     {
-        foreach (InputField item in fields)
-        {
-            item.text = "";
-        }
+        ClearFields();
         switch (lastMenu)
         {
             case Menu.mainMenu:
