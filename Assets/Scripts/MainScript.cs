@@ -225,6 +225,7 @@ public class MainScript : MonoBehaviour {
                     return;
                 }
                 currUser.money += float.Parse(fields[0].text);
+                SendError("Операція пройшла успішно!\nТепер на вашому рахунку : " + currUser.money + " " + currUser.currency);
 
             }
             catch (System.Exception exeption)
@@ -252,6 +253,7 @@ public class MainScript : MonoBehaviour {
                 if (currUser.money >= float.Parse(fields[0].text))
                 {
                     currUser.money -= float.Parse(fields[0].text);
+                    SendError("Операція пройшла успішно!\nТепер на вашому рахунку : " + currUser.money + " " + currUser.currency);
                 }
                 else
                 {
@@ -284,7 +286,6 @@ public class MainScript : MonoBehaviour {
                 + "\nВаш логін : " + currUser.login
                 + "\nВаш пароль : " + currUser.pass
                 + "\nБаланс : " + currUser.money + " " + currUser.currency;
-        SendError("Операція пройшла успішно!\nТепер на вашому рахунку : " + currUser.money + " " + currUser.currency);
     }
 
     public void TransactionMoney()
@@ -373,11 +374,16 @@ public class MainScript : MonoBehaviour {
     
     public void CreateUser()
     {
-        if (fields[0].text == null || fields[0].text == "") return;
-        if (fields[1].text == null || fields[1].text == "") return;
-        if (fields[0].text == null || fields[2].text == "") return;
-        if (fields[1].text == null || fields[3].text == "") return;
-        if (fields[1].text == null || fields[4].text == "") return;
+        if (fields[0].text == null || fields[0].text == "" || fields[1].text == null || fields[1].text == "" || fields[2].text == null || fields[2].text == "" || fields[3].text == null || fields[3].text == "" || fields[4].text == null || fields[4].text == "")
+        {
+            SendError("Заповніть всі поля");
+            return;
+        }
+        if (Database.FindByLogin(fields[3].text) != null)
+        {
+            SendError("Користувач з вказаним логіном вже існує");
+            return;
+        }
         Database.users.Add(new User(fields[3].text, fields[4].text, false, 0, fields[0].text, fields[1].text, fields[2].text));
         BackToLastMenu();
     }
