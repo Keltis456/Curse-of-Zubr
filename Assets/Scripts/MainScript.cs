@@ -225,6 +225,7 @@ public class MainScript : MonoBehaviour {
                     return;
                 }
                 currUser.money += float.Parse(fields[0].text);
+                OperationsLog.AddToLog(currUser.login, float.Parse(fields[0].text), currUser.login);
                 SendError("Операція пройшла успішно!\nТепер на вашому рахунку : " + currUser.money + " " + currUser.currency);
 
             }
@@ -253,6 +254,7 @@ public class MainScript : MonoBehaviour {
                 if (currUser.money >= float.Parse(fields[0].text))
                 {
                     currUser.money -= float.Parse(fields[0].text);
+                    OperationsLog.AddToLog(currUser.login, float.Parse(fields[0].text) * (-1), currUser.login);
                     SendError("Операція пройшла успішно!\nТепер на вашому рахунку : " + currUser.money + " " + currUser.currency);
                 }
                 else
@@ -286,6 +288,11 @@ public class MainScript : MonoBehaviour {
                 + "\nВаш логін : " + currUser.login
                 + "\nВаш пароль : " + currUser.pass
                 + "\nБаланс : " + currUser.money + " " + currUser.currency;
+    }
+
+    public void ShowSelfLog()
+    {
+        ShowLogMenu(currUser.login);
     }
 
     public void TransactionMoney()

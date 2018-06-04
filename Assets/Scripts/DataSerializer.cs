@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using UnityEngine;
 
 public static class DataSerializer {
 
@@ -6,26 +7,29 @@ public static class DataSerializer {
     static string input;
     static string[] vs;
     static string[] vsvs;
+    static string savePath;
 
     public static void SaveData()
     {
+        savePath = Application.persistentDataPath + @"\Users.txt";
         output = "";
         foreach (User item in Database.users)
         {
             output += item.login + "/" + item.pass + "/" + item.isBlocked.ToString() + "/" + item.money + "/" + item.name + "/" + item.surname + "/" + item.patronymic + "|";
         }
-        if (File.Exists(@"C:\Users\Public\Users.txt"))
+        if (File.Exists(savePath))
         {
-            File.Delete(@"C:\Users\Public\Users.txt");
+            File.Delete(savePath);
         }
-        File.WriteAllText(@"C:\Users\Public\Users.txt", output);
+        File.WriteAllText(savePath, output);
     }
 
     public static void LoadData()
     {
-        if (File.Exists(@"C:\Users\Public\Users.txt"))
+        savePath = Application.persistentDataPath + @"\Users.txt";
+        if (File.Exists(savePath))
         {
-            input = File.ReadAllText(@"C:\Users\Public\Users.txt");
+            input = File.ReadAllText(savePath);
         }
         else
         {
