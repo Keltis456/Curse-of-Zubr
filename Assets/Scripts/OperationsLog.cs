@@ -128,7 +128,7 @@ public static class OperationsLog {
         }
         if (output == "" || output == null)
         {
-            return "Цей користувач ще не робив і не приймав ніяких переказів";
+            return "Історія грошових переказів порожня";
         }
         return output;
     }
